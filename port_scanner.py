@@ -35,15 +35,20 @@ def scan_port(ip_addr, port):
         sock = socket.socket()
         sock.settimeout(0.5)
         sock.connect((ip_addr, port))
-        print(f'[+] Port {port} is open : {get_banner(sock)}')
+        return True, get_banner(sock)
     except:
-        pass
+        return False, ''
 
 def scan(target, port_list):
     ip_addr = check_ip(target)
-    print(f'[ - 0 Scanning {target}]')
+    open_ports = {}
     for port in port_list:
-        scan_port(ip_addr, port)
+        port_is_open, banner = scan_port(ip_addr, port)
+        if port_is_open:
+            open_ports[port] = banner
+    
+    return open_ports
+
 
 def main():
     targets = input('[+] Enter target(s) to scan (comma seperated): ')
@@ -51,7 +56,10 @@ def main():
     port_list = parse_ports(ports)
 
     for ip_addr in targets.split(','):
-        scan(ip_addr.strip(' '), port_list)
+        print(f'[ - 0 Scanning {ip_addr}]')
+        open_ports = scan(ip_addr.strip(' '), port_list)
+        for port in open_ports:
+            print(f'[+] Port {port} is open : {open_ports[port]}')
 
     
 
